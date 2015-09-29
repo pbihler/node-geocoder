@@ -41,6 +41,7 @@
         });
 
         describe('#geocode' , function() {
+
             it('Should not accept IPv4', function() {
 
                 var googleAdapter = new GoogleGeocoder(mockedHttpAdapter);
@@ -172,8 +173,19 @@
                         "streetName"  : "Champs-Élysées",
                         "streetNumber": "1",
                         "countryCode" : "Fr",
-                        "state"       : "Île-de-France",
-                        "stateCode"   : "IDF"
+                        "administrativeLevels": {
+                            "level1long": "Île-de-France",
+                            "level1short": "IDF"
+                        },
+                        "extra": {
+                          "confidence": 0,
+                          "premise": null,
+                          "subpremise": null,
+                          "neighborhood": null,
+                          "establishment": null,
+                          "googlePlaceId": null
+                        },
+                        "formattedAddress": null
                     });
 
                     results.raw.should.deep.equal({ status: "OK", results: [{
@@ -223,6 +235,188 @@
 
                 googleAdapter.geocode('1 champs élysées Paris', function(err, results) {
                     err.message.should.to.equal("Status is INVALID_REQUEST.");
+                    mock.verify();
+                    done();
+                });
+            });
+
+            it('Should exclude partial match geocoded address if excludePartialMatches option is set to true', function(done) {
+
+                var mock = sinon.mock(mockedHttpAdapter);
+
+                mock.expects('get').once().callsArgWith(2, false, { status: "OK", results: [{
+                        geometry: {location : {
+                            lat: 37.386,
+                            lng: -122.0838
+                        }},
+                        address_components: [
+                            {types: ['country'], long_name: 'France', short_name: 'Fr' },
+                            {types: ['locality'], long_name: 'Paris' },
+                            {types: ['postal_code'], long_name: '75008' },
+                            {types: ['route'], long_name: 'Champs-Élysées' },
+                            {types: ['street_number'], long_name: '1' },
+                            {types: ['administrative_area_level_1'], long_name: 'Île-de-France', short_name: 'IDF'}
+                        ],
+                        country_code: 'US',
+                        country_name: 'United States',
+                        locality: 'Mountain View',
+                        partial_match: true
+                    }]}
+                );
+                var googleAdapter = new GoogleGeocoder(mockedHttpAdapter, { clientId: 'clientId', apiKey: 'apiKey', excludePartialMatches: true});
+
+                googleAdapter.geocode('1 champs élysées Paris', function(err, results) {
+                    err.should.to.equal(false);
+                    results.length.should.eql(0);
+
+                    mock.verify();
+                    done();
+                });
+            });
+
+            it('Should include partial match geocoded address if excludePartialMatches option is set to false', function(done) {
+
+                var mock = sinon.mock(mockedHttpAdapter);
+                mock.expects('get').once().callsArgWith(2, false, { status: "OK", results: [{
+                        geometry: {location : {
+                            lat: 37.386,
+                            lng: -122.0838
+                        }},
+                        address_components: [
+                            {types: ['country'], long_name: 'France', short_name: 'Fr' },
+                            {types: ['locality'], long_name: 'Paris' },
+                            {types: ['postal_code'], long_name: '75008' },
+                            {types: ['route'], long_name: 'Champs-Élysées' },
+                            {types: ['street_number'], long_name: '1' },
+                            {types: ['administrative_area_level_1'], long_name: 'Île-de-France', short_name: 'IDF'}
+                        ],
+                        country_code: 'US',
+                        country_name: 'United States',
+                        locality: 'Mountain View',
+                        partial_match: true
+                    }]}
+                );
+                var googleAdapter = new GoogleGeocoder(mockedHttpAdapter, { excludePartialMatches: false});
+
+                googleAdapter.geocode('1 champs élysées Paris', function(err, results) {
+                    err.should.to.equal(false);
+                    results[0].should.to.deep.equal({
+                        "latitude"    : 37.386,
+                        "longitude"   : -122.0838,
+                        "country"     : "France",
+                        "city"        : "Paris",
+                        "zipcode"     : "75008",
+                        "streetName"  : "Champs-Élysées",
+                        "streetNumber": "1",
+                        "countryCode" : "Fr",
+                        "administrativeLevels": {
+                            "level1long": "Île-de-France",
+                            "level1short": "IDF"
+                        },
+                        "extra": {
+                            "confidence": 0,
+                            "premise": null,
+                            "subpremise": null,
+                            "neighborhood": null,
+                            "establishment": null,
+                            "googlePlaceId": null
+                        },
+                        "formattedAddress": null
+                    });
+
+                    results.raw.should.deep.equal({ status: "OK", results: [{
+                        geometry: {location : {
+                            lat: 37.386,
+                            lng: -122.0838
+                        }},
+                        address_components: [
+                            {types: ['country'], long_name: 'France', short_name: 'Fr' },
+                            {types: ['locality'], long_name: 'Paris' },
+                            {types: ['postal_code'], long_name: '75008' },
+                            {types: ['route'], long_name: 'Champs-Élysées' },
+                            {types: ['street_number'], long_name: '1' },
+                            {types: ['administrative_area_level_1'], long_name: 'Île-de-France', short_name: 'IDF'}
+                        ],
+                        country_code: 'US',
+                        country_name: 'United States',
+                        locality: 'Mountain View',
+                        partial_match: true
+                    }]});
+
+                    mock.verify();
+                    done();
+                });
+            });
+
+            it('Should include partial match geocoded address if excludePartialMatches option is not set', function(done) {
+
+                var mock = sinon.mock(mockedHttpAdapter);
+                mock.expects('get').once().callsArgWith(2, false, { status: "OK", results: [{
+                        geometry: {location : {
+                            lat: 37.386,
+                            lng: -122.0838
+                        }},
+                        address_components: [
+                            {types: ['country'], long_name: 'France', short_name: 'Fr' },
+                            {types: ['locality'], long_name: 'Paris' },
+                            {types: ['postal_code'], long_name: '75008' },
+                            {types: ['route'], long_name: 'Champs-Élysées' },
+                            {types: ['street_number'], long_name: '1' },
+                            {types: ['administrative_area_level_1'], long_name: 'Île-de-France', short_name: 'IDF'}
+                        ],
+                        country_code: 'US',
+                        country_name: 'United States',
+                        locality: 'Mountain View',
+                        partial_match: true
+                    }]}
+                );
+                var googleAdapter = new GoogleGeocoder(mockedHttpAdapter);
+
+                googleAdapter.geocode('1 champs élysées Paris', function(err, results) {
+                    err.should.to.equal(false);
+                    results[0].should.to.deep.equal({
+                        "latitude"    : 37.386,
+                        "longitude"   : -122.0838,
+                        "country"     : "France",
+                        "city"        : "Paris",
+                        "zipcode"     : "75008",
+                        "streetName"  : "Champs-Élysées",
+                        "streetNumber": "1",
+                        "countryCode" : "Fr",
+                        "administrativeLevels": {
+                            "level1long": "Île-de-France",
+                            "level1short": "IDF"
+                        },
+                        "extra": {
+                            "confidence": 0,
+                            "premise": null,
+                            "subpremise": null,
+                            "neighborhood": null,
+                            "establishment": null,
+                            "googlePlaceId": null
+                        },
+                        "formattedAddress": null
+                    });
+
+                    results.raw.should.deep.equal({ status: "OK", results: [{
+                        geometry: {location : {
+                            lat: 37.386,
+                            lng: -122.0838
+                        }},
+                        address_components: [
+                            {types: ['country'], long_name: 'France', short_name: 'Fr' },
+                            {types: ['locality'], long_name: 'Paris' },
+                            {types: ['postal_code'], long_name: '75008' },
+                            {types: ['route'], long_name: 'Champs-Élysées' },
+                            {types: ['street_number'], long_name: '1' },
+                            {types: ['administrative_area_level_1'], long_name: 'Île-de-France', short_name: 'IDF'}
+                        ],
+                        country_code: 'US',
+                        country_name: 'United States',
+                        locality: 'Mountain View',
+                        partial_match: true
+                    }]});
+
                     mock.verify();
                     done();
                 });
@@ -278,8 +472,19 @@
                             "streetName"  : "Bedford Avenue",
                             "streetNumber": "277",
                             "countryCode" : "US",
-                            "state"       : "État de New York",
-                            "stateCode"   : "NY"
+                            "administrativeLevels": {
+                                "level1long": "État de New York",
+                                "level1short": "NY"
+                            },
+                            "extra": {
+                              "premise": null,
+                              "subpremise": null,
+                              "neighborhood": null,
+                              "establishment": null,
+                              "googlePlaceId": null,
+                              "confidence": 0
+                            },
+                            "formattedAddress": null
                         });
 
                         results.raw.should.deep.equal({ status: "OK", results: [{
@@ -348,8 +553,29 @@
 
                 mock.verify();
             });
-        });
 
+            it('Should generate signatures with all / characters replaced with _', function() {
+                var googleAdapter = new GoogleGeocoder(mockedHttpAdapter, {clientId: 'james', apiKey: 'foo'});
+                var params = {
+                  sensor: false,
+                  client: 'james',
+                  address:  'qqslfzxytfr'
+                };
+                googleAdapter._signedRequest('https://maps.googleapis.com/maps/api/geocode/json', params);
+                expect(params.signature).to.equal('ww_ja1wA8YBE_cfwmx9EQ_5y2pI=');
+            });
+
+            it('Should generate signatures with all + characters replaced with -', function() {
+                var googleAdapter = new GoogleGeocoder(mockedHttpAdapter, {clientId: 'james', apiKey: 'foo'});
+                var params = {
+                  sensor: false,
+                  client: 'james',
+                  address: 'lomxcefgkxr'
+                };
+                googleAdapter._signedRequest('https://maps.googleapis.com/maps/api/geocode/json', params);
+                expect(params.signature).to.equal('zLXE-mmcsjp2RobIXjMd9h3P-zM=');
+            });
+        });
 
     });
 

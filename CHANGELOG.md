@@ -1,24 +1,5 @@
 # Changelog
 
-## 1.1.0
-
-* add google geocoder language option
-
-## 1.2.0
-
-* add openStreetmap geocoder language option
-* improve http error handling
-
-## 1.3.0
-
-* add host options for datasciencetoolkit
-* improve tests
-
-## 1.4.0
-
-* Added support for the ESRI AGOL geocoding service
-* Included test coverage for the new geocoder
-
 ## 2.0.0
 
 * remove requestify http adapter
@@ -148,7 +129,48 @@
 
 * Refacto on nominatim geocoder, refacto on abstract geocoder, add raw response to results
 
+## 2.18.2
+
+* fix leak, and duplicate code
+
 ## 2.19.0
 
 * Made first argument of `reverse` a query object (`lat, lon` is deprecated)
 * Extended options on nominatim-based geocoders (MapQuestGeocoder, NominatimMapquestGeocoder)
+
+## 2.19.1
+
+* add village or hamlet in key city
+
+## 2.20.0
+
+* add googlePlaceId and formattedAdress
+
+## 2.21.0
+
+* geocodio geocoder
+* confidence extra property
+
+## 2.22.0
+
+* yandex geocoder
+* default https adapter
+
+## 2.23.0
+
+* google geocoder administrativeLevel
+
+## 3.0.0
+
+* remove command line geocoder: now in node-geocoder-cli
+* Remove getGeocoder from index module
+* Add Here geocoder
+
+## 3.0.2
+
+* handle no result in openstreetmap reverse
+
+## 3.2.0
+
+* excludePartialMatches
+>>>>>>> addNomatimmapquestKey

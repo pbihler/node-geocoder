@@ -4,15 +4,7 @@
 
 ![Dependencycy status](https://david-dm.org/nchaulet/node-geocoder.png)
 
-Node library for geocoding and reverse geocoding. Can be used as a nodejs library or on command line
-
-## Installation and usage (geocoder command line)
-
-```shell
-npm install -g node-geocoder
-geocoder --provider google 'Fornino, 187 Bedford Ave, Brooklyn, NY 11211'
-geocoder-reverse 48.858887 2.294486
-```
+Node library for geocoding and reverse geocoding. Can be used as a nodejs library
 
 ## Installation (nodejs library)
 
@@ -55,11 +47,14 @@ geocoder.geocode('29 champs elysée paris')
     zipcode: '75008',
     streetName: 'Champs-Élysées',
     streetNumber: '29',
-    state: 'Île de France',
-    stateCode: 'IDF'
+    administrativeLevels:
+     { level1long: 'Île-de-France',
+       level1short: 'IDF',
+       level2long: 'Paris',
+       level2short: '75' }
 }]
 
-## Advanced usage (only google provider)
+## Advanced usage (only google and here providers)
 geocoder.geocode({address: '29 champs elysée', country: 'France', zipcode: '75008'}, function(err, res) {
     console.log(res);
 });
@@ -89,10 +84,10 @@ geocoder.batchGeocode(['13 rue sainte catherine', 'another adress'], function (r
 
 ```
 
-
 ## Geocoder Provider
 
 * `google` : GoogleGeocoder. Supports address geocoding and reverse geocoding. Use `extra.clientId`and `extra.apiKey`(privateKey) for business licence. You can also use `extra.language` and `extra.region` to specify language and region, respectively. Note that 'https' is required when using an apiKey
+* `here` : HereGeocoder. Supports address geocoding and reverse geocoding. You must specify `extra.appId` and `extra.appCode` with your license keys. You can also use `extra.language`, `extra.politicalView` ([read about political views here](https://developer.here.com/rest-apis/documentation/geocoder/topics/political-views.html)), `extra.country`, and `extra.state`.
 * `freegeoip` : FreegeoipGeocoder. Supports IP geocoding
 * `datasciencetoolkit` : DataScienceToolkitGeocoder. Supports IPv4 geocoding and address geocoding. Use `extra.host` to specify a local instance
 * `openstreetmap` : OpenStreetMapGeocoder. Supports address geocoding and reverse geocoding. You can use `extra.language` and `extra.email` to specify a language and a contact email address.
@@ -102,14 +97,16 @@ geocoder.batchGeocode(['13 rue sainte catherine', 'another adress'], function (r
 * `openmapquest` : Open MapQuestGeocoder (based on OpenStreetMapGeocoder). Supports address geocoding and reverse geocoding. Needs an apiKey
 * `agol` : ArcGis Online Geocoding service. Supports geocoding and reverse. Requires a client_id & client_secret and 'https' http adapter
 * `tomtom`: TomTomGeocoder. Supports address geocoding. You need to specify `extra.apiKey`
-* `nominatimmapquest`: Same geocoder as `openstreetmap`, but queries the MapQuest servers.
+* `nominatimmapquest`: Same geocoder as `openstreetmap`, but queries the MapQuest servers. You need to specify `extra.apiKey`
 * `opencage`: OpenCage Geocoder. Uses multiple open sources. Supports address and reverse geocoding. You need to specify `extra.apiKey`
 * `smartyStreet`: Smarty street geocoder (US only), you need to specify `extra.auth_id` and `extra.auth_token`
+* `geocodio`: Geocodio, Supports address geocoding and reverse geocoding (US only)
+* `yandex`: Yandex support address geocoding, you can use `extra.language` to specify language
 
 ## Http adapter
 
-* `http`: This adapter uses the Http nodejs library (default)
-* `https`: This adapter uses the Https nodejs library
+* `https`: This adapter uses the Https nodejs library (default)
+* `http`: This adapter uses the Http nodejs library
 
 ## Formatter
 
@@ -125,11 +122,9 @@ geocoder.batchGeocode(['13 rue sainte catherine', 'another adress'], function (r
 
 ## More
 
-You can improve this project by adding new geocoders or http adapters.
+### Extra
 
-To run tests just `npm test`.
-
-To check code style install `jshint` and just run `jshint lib test`.
+[`node-geocoder-cli`](https://github.com/nchaulet/node-geocoder-cli) You can use node-geocoder-cli to geocode in shell
 
 ### Extending node geocoder
 
@@ -149,3 +144,10 @@ var formatter = {
     format: function(data) { return formattedData; },
 }
 ```
+### Contributing
+
+You can improve this project by adding new geocoders or http adapters.
+
+To run tests just `npm test`.
+
+To check code style install `jshint` and just run `jshint lib test`.
